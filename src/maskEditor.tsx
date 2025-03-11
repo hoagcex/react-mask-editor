@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./maskEditor.less";
-import { hexToRgb } from "./utils";
+import { hexToRgb, fetchImageAsBase64 } from "./utils";
 
 export interface MaskEditorProps {
   src: string;
@@ -28,21 +28,6 @@ export interface MaskEditorProps {
     | "luminosity";
 }
 
-// Avoids potential CORS issues with canvas
-const fetchImageAsBase64 = async (url: string): Promise<string> => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.statusText}`);
-  }
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
-
 export const MaskEditorDefaults = {
   cursorSize: 10,
   maskOpacity: 0.75,
@@ -62,8 +47,9 @@ export const MaskEditor: React.FC<MaskEditorProps> = (
   const canvas = React.useRef<HTMLCanvasElement | null>(null);
   const maskCanvas = React.useRef<HTMLCanvasElement | null>(null);
   const cursorCanvas = React.useRef<HTMLCanvasElement | null>(null);
-  const [context, setContext] =
-    React.useState<CanvasRenderingContext2D | null>(null);
+  const [context, setContext] = React.useState<CanvasRenderingContext2D | null>(
+    null
+  );
   const [maskContext, setMaskContext] =
     React.useState<CanvasRenderingContext2D | null>(null);
   const [cursorContext, setCursorContext] =
